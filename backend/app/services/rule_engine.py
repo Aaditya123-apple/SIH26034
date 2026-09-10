@@ -2,12 +2,14 @@ from __future__ import annotations
 
 from typing import Any
 
-from backend.app.rules_loader import get_ruleset_metadata
+import re
+from datetime import date
+from backend.app.rules_loader import resolve_rules
 
 
 class RuleEngine:
-    def evaluate(self, declarations: list[dict[str, Any]], product_name: str, source: str) -> tuple[list[dict[str, Any]], list[str], list[str], str, str]:
-        metadata = get_ruleset_metadata()
+    def evaluate(self, declarations: list[dict[str, Any]], product_name: str, source: str, *, jurisdiction: str = "IN", product_type: str = "packaged_commodity", is_imported: bool = False, inspection_date: str | None = None) -> tuple[list[dict[str, Any]], list[str], list[str], str, str]:
+        metadata = resolve_rules(jurisdiction=jurisdiction, product_type=product_type, is_imported=is_imported, inspection_date=inspection_date)
         rule_set = metadata["ruleset"]
         rule_version = metadata["version"]
         fields = {item["field"]: item for item in declarations}
@@ -34,15 +36,20 @@ class RuleEngine:
                     "image": declaration.get("image"),
                 }
 
-            if rule["required"]:
-                if declaration is None:
-                    result = "VIOLATION"
-                    explanation = f"Required declaration '{field}' is missing."
-                    violations.append(rule["name"])
-                    expected_value = "Present"
-                else:
-                    result = "PASS"
-                    explanation = f"Required declaration '{field}' detected with acceptable confidence."
+            validation_errors = self._validate(rule.get("validation", []), detected_value)
+            if rule["required"] and declaration is None:
+                result = "VIOLATION"
+                explanation = f"Required declaration '{field}' is missing."
+                violations.append(rule["name"])
+                expected_value = "Present"
+            elif rule["required"] and validation_errors:
+                result = "VIOLATION"
+                explanation = f"Declaration '{field}' failed validation: {', '.join(validation_errors)}."
+                violations.append(rule["name"])
+                expected_value = ", ".join(rule.get("validation", []))
+            elif rule["required"]:
+                result = "PASS"
+                explanation = f"Required declaration '{field}' detected and validated."
             else:
                 if declaration is None:
                     result = "NOT_APPLICABLE"
@@ -76,6 +83,10 @@ class RuleEngine:
                 "evidence": evidence,
                 "confidence": confidence,
                 "rule_version": rule_version,
+                "source": metadata.get("source"),
+                "effective_from": rule.get("effective_from"),
+                "jurisdiction": jurisdiction,
+                "product_type": product_type,
                 "status_text": status_text,
             })
 
@@ -88,3 +99,18 @@ class RuleEngine:
             final_result = "WARNING"
 
         return findings, violations, warnings, final_result, rule_version
+
+    def _validate(self, validations: list[str], value: str | None) -> list[str]:
+        if value is None:
+            return []
+        text = str(value).strip()
+        errors: list[str] = []
+        if "numeric" in validations and not re.search(r"\d", text):
+            errors.append("numeric")
+        if "unit" in validations and not re.search(r"\b(kg|g|mg|l|ml| litre|liter|litre)\b", text.lower()):
+            errors.append("unit")
+        if "date" in validations and not re.search(r"\b(\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{1,2}[/-]\d{4}|\d{4}[/-]\d{1,2}|\d{1,2}[- ](?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z -]*\d{2,4})\b", text.lower()):
+            errors.append("date")
+        if "contact" in validations and not re.search(r"(?:\+?\d[\d ()-]{7,}\d)", text):
+            errors.append("contact")
+        return errors

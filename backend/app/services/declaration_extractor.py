@@ -34,7 +34,11 @@ class DeclarationExtractor:
         lower = text.lower()
         if "mrp" in lower:
             return "mrp"
-        if "net qty" in lower or "net quantity" in lower or "qty" in lower and "kg" in lower or "g" in lower:
+        if (
+            re.search(r"\bnet\s*(qty|quantity)\b", lower)
+            or re.search(r"\bqty\b", lower)
+            or re.search(r"\b\d+(?:\.\d+)?\s*(kg|g|mg|l|ml)\b", lower)
+        ):
             return "net_quantity"
         if "manufactured by" in lower or "packer" in lower or "manufacturer" in lower:
             return "manufacturer"

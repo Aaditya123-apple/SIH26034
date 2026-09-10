@@ -7,6 +7,9 @@
       "id": "PCR-1",
       "name": "Generic product name",
       "field": "product_name",
+      "jurisdictions": ["IN"],
+      "product_types": ["packaged_commodity", "food", "cosmetics"],
+      "effective_from": "2024-07-01",
       "required": true,
       "validation": ["present"],
       "evidence_required": true
@@ -15,6 +18,9 @@
       "id": "PCR-2",
       "name": "Manufacturer or packer details",
       "field": "manufacturer",
+      "jurisdictions": ["IN"],
+      "product_types": ["packaged_commodity", "food", "cosmetics"],
+      "effective_from": "2024-07-01",
       "required": true,
       "validation": ["present"],
       "evidence_required": true
@@ -23,6 +29,9 @@
       "id": "PCR-3",
       "name": "Net quantity",
       "field": "net_quantity",
+      "jurisdictions": ["IN"],
+      "product_types": ["packaged_commodity", "food", "cosmetics"],
+      "effective_from": "2024-07-01",
       "required": true,
       "validation": ["present", "numeric", "unit"],
       "evidence_required": true
@@ -31,6 +40,9 @@
       "id": "PCR-4",
       "name": "Maximum retail price",
       "field": "mrp",
+      "jurisdictions": ["IN"],
+      "product_types": ["packaged_commodity", "food", "cosmetics"],
+      "effective_from": "2024-07-01",
       "required": true,
       "validation": ["present", "numeric"],
       "evidence_required": true
@@ -39,6 +51,9 @@
       "id": "PCR-5",
       "name": "Packing or manufacturing date",
       "field": "packing_date",
+      "jurisdictions": ["IN"],
+      "product_types": ["packaged_commodity", "food", "cosmetics"],
+      "effective_from": "2024-07-01",
       "required": true,
       "validation": ["present", "date"],
       "evidence_required": true
@@ -47,6 +62,9 @@
       "id": "PCR-6",
       "name": "Consumer-care declaration",
       "field": "consumer_care",
+      "jurisdictions": ["IN"],
+      "product_types": ["packaged_commodity", "food", "cosmetics"],
+      "effective_from": "2024-07-01",
       "required": true,
       "validation": ["present", "contact"],
       "evidence_required": true
@@ -55,6 +73,9 @@
       "id": "PCR-7",
       "name": "Estimated declaration height",
       "field": "font_height_mm",
+      "jurisdictions": ["IN"],
+      "product_types": ["packaged_commodity", "food", "cosmetics"],
+      "effective_from": "2024-07-01",
       "required": false,
       "validation": ["estimated_measurement", "requires_review"],
       "evidence_required": true
@@ -63,6 +84,9 @@
       "id": "PCR-8",
       "name": "Country of origin when applicable",
       "field": "country_of_origin",
+      "jurisdictions": ["IN"],
+      "product_types": ["packaged_commodity", "food", "cosmetics"],
+      "effective_from": "2024-07-01",
       "required": false,
       "validation": ["present_when_imported"],
       "evidence_required": true

@@ -63,12 +63,39 @@ class TesseractOCRProvider(OCRProvider):
         if not path:
             return []
         try:
-            from PIL import Image
-            data = self.pytesseract.image_to_data(Image.open(path), output_type=self.pytesseract.Output.DICT)
+            from PIL import Image, ImageOps
+            source = ImageOps.exif_transpose(Image.open(path)).convert("L")
+            candidates: list[tuple[float, list[dict[str, Any]]]] = []
+            for angle in (0, 90, 180, 270):
+                prepared = ImageOps.autocontrast(source.rotate(angle, expand=True))
+                prepared = prepared.resize((prepared.width * 2, prepared.height * 2))
+                data = self.pytesseract.image_to_data(
+                    prepared,
+                    config="--psm 3",
+                    output_type=self.pytesseract.Output.DICT,
+                )
+                lines = self._group_lines(data, image_ref.get("url"))
+                text = " ".join(item["text"].lower() for item in lines)
+                keyword_hits = sum(
+                    keyword in text
+                    for keyword in (
+                        "mrp", "net", "qty", "manufact", "packer", "best", "mfd",
+                        "consumer", "care", "india", "invoice", "quantity",
+                    )
+                )
+                average_confidence = (
+                    sum(item["confidence"] for item in lines) / len(lines)
+                    if lines else 0.0
+                )
+                score = keyword_hits * 10 + min(len(lines), 20) * 0.1 + average_confidence
+                candidates.append((score, lines))
+
+            return max(candidates, key=lambda candidate: candidate[0])[1] if candidates else []
         except Exception as exc:
             raise RuntimeError(f"Tesseract could not read {path}: {exc}") from exc
 
-        results: list[dict[str, Any]] = []
+    def _group_lines(self, data: dict[str, list[Any]], image_url: str | None) -> list[dict[str, Any]]:
+        lines: dict[tuple[int, int, int], dict[str, Any]] = {}
         for index, text in enumerate(data.get("text", [])):
             value = str(text).strip()
             if not value:
@@ -78,13 +105,38 @@ class TesseractOCRProvider(OCRProvider):
             top = int(data["top"][index])
             width = int(data["width"][index])
             height = int(data["height"][index])
-            results.append({
-                "text": value,
-                "confidence": confidence,
-                "bbox": [left, top, left + width, top + height],
-                "image": image_ref.get("url"),
-            })
-        return results
+            key = (
+                int(data.get("block_num", [0])[index]),
+                int(data.get("par_num", [0])[index]),
+                int(data.get("line_num", [index])[index]),
+            )
+            line = lines.setdefault(
+                key,
+                {
+                    "words": [],
+                    "confidences": [],
+                    "left": left,
+                    "top": top,
+                    "right": left + width,
+                    "bottom": top + height,
+                },
+            )
+            line["words"].append((left, value))
+            line["confidences"].append(confidence)
+            line["left"] = min(line["left"], left)
+            line["top"] = min(line["top"], top)
+            line["right"] = max(line["right"], left + width)
+            line["bottom"] = max(line["bottom"], top + height)
+
+        return [
+            {
+                "text": " ".join(value for _, value in sorted(line["words"])),
+                "confidence": sum(line["confidences"]) / len(line["confidences"]),
+                "bbox": [line["left"], line["top"], line["right"], line["bottom"]],
+                "image": image_url,
+            }
+            for line in lines.values()
+        ]
 
 
 class OCRService:

@@ -45,6 +45,10 @@ class InspectionService:
             "detection_source": detection["source"],
             "detection_confidence": float(detection["confidence"]),
             "detection_bbox": detection.get("detection_bbox"),
+            "jurisdiction": event.get("jurisdiction", "IN"),
+            "product_type": event.get("product_type") or event.get("category") or "packaged_commodity",
+            "is_imported": bool(event.get("is_imported", False)),
+            "inspection_date": event.get("inspection_date") or ts[:10],
             "timestamp": ts,
             "status": "DETECTED",
             "processing_stage": "DETECTED",
@@ -93,6 +97,10 @@ class InspectionService:
             declarations,
             inspection["product_name"],
             inspection["detection_source"],
+            jurisdiction=inspection.get("jurisdiction", "IN"),
+            product_type=inspection.get("product_type", "packaged_commodity"),
+            is_imported=inspection.get("is_imported", False),
+            inspection_date=inspection.get("inspection_date"),
         )
 
         inspection["status"] = "VALIDATING"

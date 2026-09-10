@@ -61,6 +61,9 @@ async def upload_inspection(
     background_tasks: BackgroundTasks,
     image: UploadFile = File(...),
     product_name: str = Form("Live Package"),
+    jurisdiction: str = Form("IN"),
+    product_type: str = Form("packaged_commodity"),
+    is_imported: bool = Form(False),
 ) -> dict:
     allowed_types = {"image/jpeg", "image/png", "image/webp"}
     if image.content_type not in allowed_types:
@@ -81,6 +84,9 @@ async def upload_inspection(
             "product_name": product_name.strip() or "Live Package",
             "confidence": 0.9,
             "source": "camera_upload",
+            "jurisdiction": jurisdiction,
+            "product_type": product_type,
+            "is_imported": is_imported,
             "images": [{"path": str(stored_path), "url": f"/media/{stored_name}"}],
         }
     )

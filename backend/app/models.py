@@ -32,6 +32,10 @@ class DetectionEvent(BaseModel):
     category: str | None = None
     manufacturer: str | None = None
     country_of_origin: str | None = None
+    jurisdiction: str = "IN"
+    product_type: str = "packaged_commodity"
+    is_imported: bool = False
+    inspection_date: str | None = None
     images: list[str] | list[dict[str, Any]] = Field(default_factory=list)
 
 

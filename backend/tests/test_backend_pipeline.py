@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from backend.app.services.inspection_service import InspectionService
+from backend.app.services.declaration_extractor import DeclarationExtractor
+from backend.app.rules_loader import resolve_rules
 
 
 def test_detection_creates_inspection():
@@ -58,3 +60,57 @@ def test_low_confidence_requires_review():
     ]
     findings, violations, warnings, overall, _ = service.rule_engine.evaluate(declarations, "Gamma Atta", "cnn")
     assert overall == "REQUIRES_REVIEW"
+
+
+def test_declaration_extractor_does_not_classify_arbitrary_text_as_quantity():
+    declarations = DeclarationExtractor().extract(
+        [{"text": "Authorised Signatory", "confidence": 0.9, "bbox": [1, 2, 3, 4]}]
+    )
+    assert declarations == []
+
+
+def test_rule_resolver_filters_by_context_and_effective_date():
+    current = resolve_rules(
+        jurisdiction="IN",
+        product_type="food",
+        inspection_date="2026-09-10",
+    )
+    assert len(current["rules"]) == 8
+
+    unsupported = resolve_rules(
+        jurisdiction="US",
+        product_type="food",
+        inspection_date="2026-09-10",
+    )
+    assert unsupported["rules"] == []
+
+    before_effective_date = resolve_rules(
+        jurisdiction="IN",
+        product_type="food",
+        inspection_date="2023-12-31",
+    )
+    assert before_effective_date["rules"] == []
+
+
+def test_rule_engine_rejects_invalid_quantity_and_contact():
+    service = InspectionService()
+    declarations = [
+        {"field": "product_name", "value": "Test Product", "confidence": 0.9},
+        {"field": "manufacturer", "value": "Test Foods", "confidence": 0.9},
+        {"field": "net_quantity", "value": "five", "confidence": 0.9},
+        {"field": "mrp", "value": "499", "confidence": 0.9},
+        {"field": "packing_date", "value": "12/2027", "confidence": 0.9},
+        {"field": "consumer_care", "value": "not a phone number", "confidence": 0.9},
+    ]
+    findings, violations, _, overall, _ = service.rule_engine.evaluate(
+        declarations,
+        "Test Product",
+        "ocr",
+        jurisdiction="IN",
+        product_type="food",
+        inspection_date="2026-09-10",
+    )
+    assert overall == "VIOLATION"
+    assert "Net quantity" in violations
+    assert "Consumer-care declaration" in violations
+    assert any(item["effective_from"] == "2024-07-01" for item in findings)

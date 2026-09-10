@@ -258,6 +258,11 @@ export async function simulateDetection(
 export async function uploadInspection(
   file: File,
   productName: string,
+  context: {
+    jurisdiction?: string;
+    productType?: string;
+    isImported?: boolean;
+  } = {},
 ): Promise<{
   inspection_id: string;
   status: string;
@@ -267,6 +272,9 @@ export async function uploadInspection(
   const formData = new FormData();
   formData.append("image", file);
   formData.append("product_name", productName);
+  formData.append("jurisdiction", context.jurisdiction ?? "IN");
+  formData.append("product_type", context.productType ?? "packaged_commodity");
+  formData.append("is_imported", String(context.isImported ?? false));
 
   const response = await apiFetch("/api/inspections/upload", {
     method: "POST",

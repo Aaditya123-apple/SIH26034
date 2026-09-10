@@ -55,6 +55,7 @@ const stageLabels: Record<string, string> = {
 export default function LiveInspectionPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const socketRef = useRef<WebSocket | null>(null);
   const [cameraActive, setCameraActive] = useState(false);
   const [productName, setProductName] = useState("Live Package");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -62,22 +63,42 @@ export default function LiveInspectionPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const closeInspectionSocket = () => {
+    socketRef.current?.close();
+    socketRef.current = null;
+  };
+
+  const clearCapturedFrame = () => {
+    closeInspectionSocket();
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+    setUpdate(null);
+    setIsUploading(false);
+  };
+
   useEffect(
     () => () => {
       streamRef.current?.getTracks().forEach((track) => track.stop());
+      socketRef.current?.close();
     },
     [],
   );
 
+  useEffect(() => {
+    if (cameraActive && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+    }
+  }, [cameraActive]);
+
   const startCamera = async () => {
     setError(null);
+    clearCapturedFrame();
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment" },
         audio: false,
       });
       streamRef.current = stream;
-      if (videoRef.current) videoRef.current.srcObject = stream;
       setCameraActive(true);
     } catch {
       setError("Camera access was unavailable. Use the image upload instead.");
@@ -91,14 +112,21 @@ export default function LiveInspectionPage() {
   };
 
   const watchInspection = (inspectionId: string) => {
+    closeInspectionSocket();
     const socket = new WebSocket(
       getRealtimeUrl(`/ws/inspections/${inspectionId}`),
     );
+    socketRef.current = socket;
     socket.onmessage = (event) =>
       setUpdate(JSON.parse(event.data) as LiveUpdate);
     socket.onerror = () =>
       setError("Live updates disconnected. Refresh the inspection to retry.");
-    socket.onclose = () => setIsUploading(false);
+    socket.onclose = () => {
+      if (socketRef.current === socket) {
+        socketRef.current = null;
+        setIsUploading(false);
+      }
+    };
   };
 
   const submitImage = async (file: File) => {
@@ -131,10 +159,17 @@ export default function LiveInspectionPage() {
 
   const captureFrame = () => {
     if (!videoRef.current) return;
+    if (!videoRef.current.videoWidth || !videoRef.current.videoHeight) {
+      setError(
+        "Camera is still starting. Wait for the preview before capturing.",
+      );
+      return;
+    }
     const canvas = document.createElement("canvas");
     canvas.width = videoRef.current.videoWidth;
     canvas.height = videoRef.current.videoHeight;
     canvas.getContext("2d")?.drawImage(videoRef.current, 0, 0);
+    stopCamera();
     canvas.toBlob(
       (blob) => {
         if (blob)
