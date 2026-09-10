@@ -4,6 +4,9 @@ import * as React from "react"
 import { useState } from "react"
 import { MainLayout } from "@/components/main-layout"
 import { Card, CardContent, CardHeader, CardTitle, Button, Badge } from "@/components/ui"
+import { LoadingSpinner } from "@/components/ui"
+import { fetchReports } from "@/lib/api"
+import type { Report } from "@/lib/types"
 import { 
   FileText, 
   Download, 
@@ -13,40 +16,6 @@ import {
   Filter
 } from "lucide-react"
 import { downloadPDF } from "@/lib/pdf-generator"
-
-interface Report {
-  id: string
-  productName: string
-  productId: string
-  category: string
-  complianceScore: number
-  status: "Compliant" | "Partially Compliant" | "Non-Compliant"
-  date: string
-  violations: Violation[]
-  factoryInfo: FactoryInfo
-  lawViolations: LawViolation[]
-}
-
-interface Violation {
-  id: string
-  type: string
-  severity: "critical" | "high" | "medium" | "low"
-  description: string
-}
-
-interface FactoryInfo {
-  factoryName: string
-  city: string
-  region: string
-  manufacturingDate: string
-  destination: string
-}
-
-interface LawViolation {
-  law: string
-  section: string
-  description: string
-}
 
 const mockReports: Report[] = [
   {
@@ -179,12 +148,39 @@ const mockReports: Report[] = [
 ]
 
 export default function ReportsPage() {
+  const [reports, setReports] = useState<Report[]>(mockReports)
   const [selectedReport, setSelectedReport] = useState<Report | null>(null)
   const [filter, setFilter] = useState<"all" | "compliant" | "non-compliant">("all")
+  const [isLoading, setIsLoading] = useState(Boolean(process.env.NEXT_PUBLIC_API_URL))
+  const [apiError, setApiError] = useState<string | null>(null)
+
+  React.useEffect(() => {
+    if (!process.env.NEXT_PUBLIC_API_URL) {
+      return
+    }
+
+    const controller = new AbortController()
+
+    fetchReports(controller.signal)
+      .then((liveReports) => {
+        setReports(liveReports)
+        setApiError(null)
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return
+        }
+
+        setApiError(error instanceof Error ? error.message : "Unable to load live reports")
+      })
+      .finally(() => setIsLoading(false))
+
+    return () => controller.abort()
+  }, [])
 
   const filteredReports = filter === "all" 
-    ? mockReports 
-    : mockReports.filter(r => 
+    ? reports 
+    : reports.filter(r => 
         filter === "compliant" ? r.status === "Compliant" : r.status !== "Compliant"
       )
 
@@ -199,7 +195,7 @@ export default function ReportsPage() {
     return { level: "Critical", color: "bg-red-100 text-red-800" }
   }
 
-  const violationByType = mockReports.reduce((acc, report) => {
+  const violationByType = reports.reduce((acc, report) => {
     report.violations.forEach(v => {
       acc[v.type] = (acc[v.type] || 0) + 1
     })
@@ -209,6 +205,17 @@ export default function ReportsPage() {
   return (
     <MainLayout>
       <div className="space-y-6">
+        {isLoading && (
+          <div className="flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+            <LoadingSpinner size="sm" />
+            Loading reports from the compliance service...
+          </div>
+        )}
+        {apiError && (
+          <div className="rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
+            Live reports are unavailable. Showing demo data. {apiError}
+          </div>
+        )}
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -234,7 +241,7 @@ export default function ReportsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-slate-900">{mockReports.length}</div>
+              <div className="text-2xl font-bold text-slate-900">{reports.length}</div>
             </CardContent>
           </Card>
           <Card className="glass">
@@ -245,7 +252,7 @@ export default function ReportsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
-                {mockReports.filter(r => r.status === "Compliant").length}
+                {reports.filter(r => r.status === "Compliant").length}
               </div>
             </CardContent>
           </Card>
@@ -257,7 +264,7 @@ export default function ReportsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-yellow-600">
-                {mockReports.filter(r => r.status === "Partially Compliant").length}
+                {reports.filter(r => r.status === "Partially Compliant").length}
               </div>
             </CardContent>
           </Card>
@@ -269,7 +276,7 @@ export default function ReportsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">
-                {mockReports.filter(r => r.status === "Non-Compliant").length}
+                {reports.filter(r => r.status === "Non-Compliant").length}
               </div>
             </CardContent>
           </Card>
@@ -286,8 +293,8 @@ export default function ReportsPage() {
           <CardContent>
             <div className="space-y-4">
               {Object.entries(violationByType).map(([type, count]) => {
-                const percentage = (count / mockReports.length) * 100
-                const concern = getConcernLevel(count, mockReports.length)
+                const percentage = reports.length === 0 ? 0 : (count / reports.length) * 100
+                const concern = getConcernLevel(count, reports.length)
                 
                 return (
                   <div key={type} className="flex items-center justify-between p-4 rounded-lg border border-slate-200">
