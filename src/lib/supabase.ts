@@ -7,7 +7,6 @@ const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 export function isSupabaseConfigured(): boolean {
   return Boolean(SUPABASE_URL && SUPABASE_ANON_KEY)
 }
-
 interface SupabaseAuthResponse {
   access_token: string
   refresh_token?: string
@@ -95,26 +94,3 @@ export async function fetchSupabaseReports(): Promise<Report[]> {
   }))
 }
 
-export async function uploadInspectionImage(file: File): Promise<string> {
-  const { url, anonKey } = requireSupabaseConfig()
-  const filePath = `${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "-")}`
-  const headers = new Headers({
-    apikey: anonKey,
-    "Content-Type": file.type || "application/octet-stream",
-    "x-upsert": "false",
-  })
-  const accessToken = getAccessToken()
-  headers.set("Authorization", `Bearer ${accessToken ?? anonKey}`)
-
-  const response = await fetch(`${url}/storage/v1/object/inspection-images/${filePath}`, {
-    method: "POST",
-    headers,
-    body: file,
-  })
-
-  if (!response.ok) {
-    throw new Error(`Image upload failed with status ${response.status}`)
-  }
-
-  return filePath
-}

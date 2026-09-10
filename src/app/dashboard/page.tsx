@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { AlertTriangle, ArrowRight, CheckCircle2, ClipboardCheck, Plus, ScanLine } from "lucide-react"
+import { AlertTriangle, ArrowRight, CheckCircle2, ClipboardCheck, ScanLine } from "lucide-react"
 import { MainLayout } from "@/components/main-layout"
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@/components/ui"
 
@@ -23,19 +23,13 @@ export default function DashboardPage() {
           <div className="max-w-2xl">
             <div className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
               <ScanLine className="h-4 w-4" />
-              Evidence-backed inspection
+              Evidence-backed compliance
             </div>
             <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Legal Metrology AI</h1>
             <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300">
               Turn package images into structured declarations, rule checks, visual evidence, and an auditable report.
             </p>
           </div>
-          <Button asChild size="lg" className="bg-amber-400 text-slate-950 hover:bg-amber-300">
-            <Link href="/inspections/new">
-              <Plus className="mr-2 h-5 w-5" />
-              New inspection
-            </Link>
-          </Button>
         </section>
 
         <section className="grid gap-4 md:grid-cols-3">
@@ -75,8 +69,8 @@ export default function DashboardPage() {
           <Card className="glass">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle>Recent inspections</CardTitle>
-                <p className="mt-1 text-sm text-slate-500">Latest evidence-backed product checks</p>
+                <CardTitle>Recent compliance reports</CardTitle>
+                <p className="mt-1 text-sm text-slate-500">Latest backend-generated product checks</p>
               </div>
               <Link href="/reports" className="text-sm font-semibold text-primary hover:underline">View all</Link>
             </CardHeader>
@@ -101,13 +95,10 @@ export default function DashboardPage() {
 
           <Card className="border-slate-200 bg-slate-950 text-white">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><ScanLine className="h-5 w-5 text-amber-300" />Authoritative analysis</CardTitle>
+              <CardTitle className="flex items-center gap-2"><ScanLine className="h-5 w-5 text-amber-300" />Backend analysis</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm leading-6 text-slate-300">Every inspection is submitted to the authorised CNN and rule-engine service. The browser only presents the returned evidence.</p>
-              <Button asChild variant="outline" className="mt-5 border-slate-700 bg-slate-900 text-white hover:bg-slate-800">
-                <Link href="/inspections/new">Start inspection</Link>
-              </Button>
+              <p className="text-sm leading-6 text-slate-300">The authorised CNN and rule-engine service produces these reports. This dashboard presents the returned evidence for review.</p>
             </CardContent>
           </Card>
         </section>

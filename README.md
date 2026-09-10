@@ -43,7 +43,7 @@ npm start
 
 Set `NEXT_PUBLIC_API_URL` to the backend API base URL. The frontend requests `GET /reports` and sends a JWT as `Authorization: Bearer <token>` when one has been stored after login. It also sends `credentials: include` so the backend may use a secure HttpOnly cookie instead.
 
-Inspection analysis is backend-only. The frontend submits `POST /inspections` as multipart form data using the `images` field, then polls `GET /inspections/{id}` until the job is `completed` or `failed`. A completed job must return the report, declarations, findings, confidence values, and evidence regions in the inspection result contract consumed by the inspection screen.
+Inspection analysis is backend-only. The CNN, OCR, declaration extraction, rule engine, evidence generation, and report creation run in the separate backend service. This website only displays the backend-generated reports and historical results.
 
 The backend must allow the deployed frontend origin, not `*` when credentials are enabled:
 

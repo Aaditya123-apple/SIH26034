@@ -223,7 +223,7 @@ export default function ReportsPage() {
           <div>
             <h1 className="text-3xl font-bold text-slate-900">Compliance Reports</h1>
             <p className="text-slate-600">
-              View and analyze compliance inspection reports
+              View and analyze backend-generated compliance reports
             </p>
           </div>
           <div className="flex items-center space-x-2">

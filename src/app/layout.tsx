@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Legal Metrology Compliance Platform",
-  description: "Compliance Inspection and Analysis System",
+  description: "Evidence-backed Legal Metrology compliance reports",
 }
 
 export default function RootLayout({
