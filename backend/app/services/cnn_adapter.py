@@ -26,6 +26,17 @@ class MockDetectionProvider(DetectionProvider):
         }
 
 
+class CNNDetectionProvider(MockDetectionProvider):
+    """Compatibility alias for the legacy CNN selection name.
+
+    This project does not ship a trained CNN model, so the provider behaves like the
+    deterministic mock detector while preserving legacy config values such as
+    DETECTION_PROVIDER=cnn without silently falling through to the wrong branch.
+    """
+
+    pass
+
+
 class YoloDetectionProvider(DetectionProvider):
     def __init__(self) -> None:
         model_path = os.getenv("DETECTION_MODEL_PATH")

@@ -1,0 +1,15 @@
+
+> legal-metrology-platform@0.1.0 dev
+> next dev --hostname 0.0.0.0 --port 3000
+
+   ▲ Next.js 15.5.7
+   - Local:        http://localhost:3000
+   - Network:      http://0.0.0.0:3000
+
+ ✓ Starting...
+ ✓ Ready in 2.2s
+ ○ Compiling /inspection/live ...
+ ✓ Compiled /inspection/live in 6.1s (856 modules)
+ GET /inspection/live 200 in 6971ms
+ ✓ Compiled in 911ms (366 modules)
+[?25h

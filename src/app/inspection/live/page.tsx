@@ -108,6 +108,9 @@ export default function LiveInspectionPage() {
   const stopCamera = () => {
     streamRef.current?.getTracks().forEach((track) => track.stop());
     streamRef.current = null;
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
     setCameraActive(false);
   };
 
@@ -132,7 +135,10 @@ export default function LiveInspectionPage() {
   const submitImage = async (file: File) => {
     setError(null);
     setIsUploading(true);
-    setPreviewUrl(URL.createObjectURL(file));
+    setPreviewUrl((currentPreview) => {
+      if (currentPreview) URL.revokeObjectURL(currentPreview);
+      return URL.createObjectURL(file);
+    });
     try {
       const result = await uploadInspection(file, productName);
       setUpdate({
@@ -172,10 +178,18 @@ export default function LiveInspectionPage() {
     stopCamera();
     canvas.toBlob(
       (blob) => {
-        if (blob)
-          void submitImage(
-            new File([blob], "camera-capture.jpg", { type: "image/jpeg" }),
+        if (!blob) {
+          setError(
+            "The captured frame could not be processed. Please try again.",
           );
+          return;
+        }
+
+        const captureFile = new File([blob], "camera-capture.jpg", {
+          type: "image/jpeg",
+        });
+
+        void submitImage(captureFile);
       },
       "image/jpeg",
       0.9,
@@ -221,8 +235,11 @@ export default function LiveInspectionPage() {
                     src={previewUrl}
                     alt="Uploaded package"
                     className="h-full w-full object-contain"
+                    onError={() =>
+                      setError("The captured image could not be loaded.")
+                    }
                   />
-                ) : (
+                ) : cameraActive ? (
                   <video
                     ref={videoRef}
                     autoPlay
@@ -230,6 +247,13 @@ export default function LiveInspectionPage() {
                     playsInline
                     className="h-full w-full object-cover"
                   />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-center text-sm text-slate-300">
+                    <div>
+                      <Camera className="mx-auto mb-2 h-8 w-8 text-slate-400" />
+                      Camera preview will appear here
+                    </div>
+                  </div>
                 )}
               </div>
               <div className="flex flex-wrap gap-3">

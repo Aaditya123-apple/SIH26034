@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+
 from backend.app.services.inspection_service import InspectionService
 from backend.app.services.declaration_extractor import DeclarationExtractor
 from backend.app.rules_loader import resolve_rules
@@ -17,6 +19,12 @@ def test_detection_creates_inspection():
     inspection = service.create_detection_inspection(event)
     assert inspection["inspection_id"].startswith("INSP-")
     assert inspection["product_name"] == "Alpha Atta"
+
+
+def test_cnn_alias_uses_compatible_detection_provider(monkeypatch):
+    monkeypatch.setenv("DETECTION_PROVIDER", "cnn")
+    service = InspectionService()
+    assert service.cnn_provider.__class__.__name__ == "CNNDetectionProvider"
 
 
 def test_rule_engine_passes_for_mrp_and_quantity():

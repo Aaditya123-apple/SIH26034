@@ -6,7 +6,12 @@ from datetime import datetime, timezone
 from typing import Any
 
 from backend.app.database import add_audit_event, get_audit_events, get_inspection, list_inspections, save_inspection
-from backend.app.services.cnn_adapter import DetectionProvider, MockDetectionProvider, YoloDetectionProvider
+from backend.app.services.cnn_adapter import (
+    CNNDetectionProvider,
+    DetectionProvider,
+    MockDetectionProvider,
+    YoloDetectionProvider,
+)
 from backend.app.services.declaration_extractor import DeclarationExtractor
 from backend.app.services.evidence_service import EvidenceService
 from backend.app.services.image_processing import ImageProcessingService
@@ -17,7 +22,16 @@ from backend.app.services.rule_engine import RuleEngine
 class InspectionService:
     def __init__(self):
         provider = os.getenv("DETECTION_PROVIDER", "demo").lower()
-        self.cnn_provider: DetectionProvider = YoloDetectionProvider() if provider == "yolo" else MockDetectionProvider()
+        if provider in {"demo", "mock"}:
+            self.cnn_provider: DetectionProvider = MockDetectionProvider()
+        elif provider == "cnn":
+            self.cnn_provider = CNNDetectionProvider()
+        elif provider == "yolo":
+            self.cnn_provider = YoloDetectionProvider()
+        else:
+            raise ValueError(
+                "Unsupported DETECTION_PROVIDER value. Use one of: demo, mock, cnn, yolo."
+            )
         self.image_service = ImageProcessingService()
         self.ocr_service = OCRService()
         self.declaration_extractor = DeclarationExtractor()

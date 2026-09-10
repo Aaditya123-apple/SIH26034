@@ -1,0 +1,5 @@
+INFO:     Started server process [32314]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+./start-local.sh: line 130: 32314 Killed: 9               "$PYTHON_BIN" -m uvicorn backend.app.main:app --host 0.0.0.0 --port 8000
