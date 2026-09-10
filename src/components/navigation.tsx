@@ -5,8 +5,10 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { 
+  LayoutDashboard,
   FileText, 
   Factory, 
+  ScanLine,
   Menu,
   X,
   Search,
@@ -18,6 +20,8 @@ import { Button } from "@/components/ui"
 import { Input } from "@/components/ui"
 
 const navigation = [
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "New Inspection", href: "/inspections/new", icon: ScanLine },
   { name: "Reports", href: "/reports", icon: FileText },
   { name: "Factory Tracking", href: "/factories", icon: Factory },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },

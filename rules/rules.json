@@ -1,0 +1,71 @@
+{
+  "ruleset": "Legal Metrology (Packaged Commodities) Rules",
+  "version": "2026.09",
+  "source": "Department of Consumer Affairs / Legal Metrology official material",
+  "rules": [
+    {
+      "id": "PCR-1",
+      "name": "Generic product name",
+      "field": "product_name",
+      "required": true,
+      "validation": ["present"],
+      "evidence_required": true
+    },
+    {
+      "id": "PCR-2",
+      "name": "Manufacturer or packer details",
+      "field": "manufacturer",
+      "required": true,
+      "validation": ["present"],
+      "evidence_required": true
+    },
+    {
+      "id": "PCR-3",
+      "name": "Net quantity",
+      "field": "net_quantity",
+      "required": true,
+      "validation": ["present", "numeric", "unit"],
+      "evidence_required": true
+    },
+    {
+      "id": "PCR-4",
+      "name": "Maximum retail price",
+      "field": "mrp",
+      "required": true,
+      "validation": ["present", "numeric"],
+      "evidence_required": true
+    },
+    {
+      "id": "PCR-5",
+      "name": "Packing or manufacturing date",
+      "field": "packing_date",
+      "required": true,
+      "validation": ["present", "date"],
+      "evidence_required": true
+    },
+    {
+      "id": "PCR-6",
+      "name": "Consumer-care declaration",
+      "field": "consumer_care",
+      "required": true,
+      "validation": ["present", "contact"],
+      "evidence_required": true
+    },
+    {
+      "id": "PCR-7",
+      "name": "Estimated declaration height",
+      "field": "font_height_mm",
+      "required": false,
+      "validation": ["estimated_measurement", "requires_review"],
+      "evidence_required": true
+    },
+    {
+      "id": "PCR-8",
+      "name": "Country of origin when applicable",
+      "field": "country_of_origin",
+      "required": false,
+      "validation": ["present_when_imported"],
+      "evidence_required": true
+    }
+  ]
+}
