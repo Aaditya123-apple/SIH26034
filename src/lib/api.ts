@@ -1,5 +1,6 @@
 import type { Report } from "./types"
 import { clearAccessToken, getAccessToken, setAccessToken } from "./auth"
+import type { DemoInspectionResult } from "./demo-inspection"
 import { fetchSupabaseReports, isSupabaseConfigured, signInWithPassword } from "./supabase"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "")
@@ -11,6 +12,15 @@ interface ReportsResponse {
 interface LoginResponse {
   accessToken?: string
   token?: string
+}
+
+export interface InspectionJob {
+  id: string
+  status: "queued" | "processing" | "completed" | "failed"
+  progress?: number
+  step?: string
+  result?: DemoInspectionResult
+  error?: string
 }
 
 export async function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
@@ -50,6 +60,36 @@ export async function fetchReports(signal?: AbortSignal): Promise<Report[]> {
 
   const payload = (await response.json()) as Report[] | ReportsResponse
   return Array.isArray(payload) ? payload : payload.reports ?? []
+}
+
+export async function submitInspection(files: File[]): Promise<InspectionJob> {
+  const formData = new FormData()
+  files.forEach((file) => formData.append("images", file))
+
+  const response = await apiFetch("/inspections", {
+    method: "POST",
+    body: formData,
+  })
+
+  if (!response.ok) {
+    throw new Error(`Inspection submission failed with status ${response.status}`)
+  }
+
+  return (await response.json()) as InspectionJob
+}
+
+export async function fetchInspection(id: string, signal?: AbortSignal): Promise<InspectionJob> {
+  const response = await apiFetch(`/inspections/${encodeURIComponent(id)}`, {
+    method: "GET",
+    signal,
+    cache: "no-store",
+  })
+
+  if (!response.ok) {
+    throw new Error(`Inspection status request failed with status ${response.status}`)
+  }
+
+  return (await response.json()) as InspectionJob
 }
 
 export async function login(email: string, password: string): Promise<void> {

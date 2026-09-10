@@ -2,7 +2,6 @@ import Link from "next/link"
 import { AlertTriangle, ArrowRight, CheckCircle2, ClipboardCheck, Plus, ScanLine } from "lucide-react"
 import { MainLayout } from "@/components/main-layout"
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@/components/ui"
-import { demoInspectionResult } from "@/lib/demo-inspection"
 
 const recentInspections = [
   { product: "Harvest Gold Basmati Rice", id: "LM-2026-000128", status: "Non-Compliant", date: "10 Sep 2026", score: 78 },
@@ -84,7 +83,7 @@ export default function DashboardPage() {
             <CardContent className="p-0">
               <div className="divide-y divide-slate-100">
                 {recentInspections.map((inspection) => (
-                  <Link key={inspection.id} href={inspection.id === demoInspectionResult.report.id ? "/inspections/new?demo=result" : "/reports"} className="flex items-center justify-between gap-4 px-6 py-4 transition-colors hover:bg-slate-50">
+                  <Link key={inspection.id} href="/reports" className="flex items-center justify-between gap-4 px-6 py-4 transition-colors hover:bg-slate-50">
                     <div className="min-w-0">
                       <p className="truncate font-semibold text-slate-900">{inspection.product}</p>
                       <p className="mt-1 text-xs text-slate-500">{inspection.id} · {inspection.date}</p>
@@ -100,14 +99,14 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-amber-200 bg-amber-50/70">
+          <Card className="border-slate-200 bg-slate-950 text-white">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><ScanLine className="h-5 w-5 text-amber-700" />Presentation demo</CardTitle>
+              <CardTitle className="flex items-center gap-2"><ScanLine className="h-5 w-5 text-amber-300" />Authoritative analysis</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm leading-6 text-slate-700">Use the synthetic rice package to demonstrate the complete inspection loop without depending on a live OCR service.</p>
-              <Button asChild variant="outline" className="mt-5 border-amber-300 bg-white hover:bg-amber-100">
-                <Link href="/inspections/new?demo=ready">Open demo inspection</Link>
+              <p className="text-sm leading-6 text-slate-300">Every inspection is submitted to the authorised CNN and rule-engine service. The browser only presents the returned evidence.</p>
+              <Button asChild variant="outline" className="mt-5 border-slate-700 bg-slate-900 text-white hover:bg-slate-800">
+                <Link href="/inspections/new">Start inspection</Link>
               </Button>
             </CardContent>
           </Card>

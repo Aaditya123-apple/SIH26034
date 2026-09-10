@@ -7,7 +7,6 @@ import {
   ArrowLeft,
   Check,
   CheckCircle2,
-  ChevronRight,
   CircleDashed,
   FileText,
   ImagePlus,
@@ -19,7 +18,8 @@ import {
 } from "lucide-react"
 import { MainLayout } from "@/components/main-layout"
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@/components/ui"
-import { demoInspectionResult, inspectionSteps, type FindingState } from "@/lib/demo-inspection"
+import { fetchInspection, submitInspection } from "@/lib/api"
+import { inspectionSteps, type DemoInspectionResult, type FindingState } from "@/lib/demo-inspection"
 import { downloadPDF } from "@/lib/pdf-generator"
 
 function stateStyles(state: FindingState) {
@@ -31,51 +31,50 @@ function stateStyles(state: FindingState) {
 export default function NewInspectionPage() {
   const inputRef = useRef<HTMLInputElement>(null)
   const [files, setFiles] = useState<File[]>([])
-  const [demoReady, setDemoReady] = useState(false)
-  const [showResult, setShowResult] = useState(false)
+  const [result, setResult] = useState<DemoInspectionResult | null>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [stepIndex, setStepIndex] = useState(-1)
-
-  useEffect(() => {
-    const query = new URLSearchParams(window.location.search).get("demo")
-    if (query === "ready") setDemoReady(true)
-    if (query === "result") {
-      setDemoReady(true)
-      setShowResult(true)
-      setStepIndex(inspectionSteps.length - 1)
-    }
-  }, [])
+  const [error, setError] = useState<string | null>(null)
 
   const addFiles = (incoming: FileList | File[]) => {
     const images = Array.from(incoming).filter((file) => file.type.startsWith("image/"))
     setFiles((current) => [...current, ...images].slice(0, 6))
-    setDemoReady(false)
-    setShowResult(false)
+    setResult(null)
+    setError(null)
   }
 
-  const analyse = () => {
+  const analyse = async () => {
+    if (files.length === 0) return
+
     setIsAnalyzing(true)
-    setShowResult(false)
+    setResult(null)
+    setError(null)
     setStepIndex(0)
-    let currentStep = 0
-    const timer = window.setInterval(() => {
-      currentStep += 1
-      if (currentStep >= inspectionSteps.length) {
-        window.clearInterval(timer)
-        setIsAnalyzing(false)
-        setStepIndex(inspectionSteps.length - 1)
-        setShowResult(true)
-        return
-      }
-      setStepIndex(currentStep)
-    }, 650)
-  }
 
-  const useDemo = () => {
-    setDemoReady(true)
-    setFiles([])
-    setShowResult(false)
-    setStepIndex(-1)
+    try {
+      let job = await submitInspection(files)
+      while (job.status === "queued" || job.status === "processing") {
+        const progress = job.progress ?? 0
+        setStepIndex(Math.min(inspectionSteps.length - 1, Math.round((progress / 100) * (inspectionSteps.length - 1))))
+        await new Promise((resolve) => window.setTimeout(resolve, 1200))
+        job = await fetchInspection(job.id)
+      }
+
+      if (job.status === "failed") {
+        throw new Error(job.error ?? "The backend inspection failed")
+      }
+      if (!job.result) {
+        throw new Error("The backend completed without returning an inspection result")
+      }
+
+      setStepIndex(inspectionSteps.length - 1)
+      setResult(job.result)
+    } catch (inspectionError) {
+      setError(inspectionError instanceof Error ? inspectionError.message : "Unable to analyse the uploaded images")
+      setStepIndex(-1)
+    } finally {
+      setIsAnalyzing(false)
+    }
   }
 
   return (
@@ -91,7 +90,7 @@ export default function NewInspectionPage() {
           </div>
         </div>
 
-        {!showResult && (
+        {!result && (
           <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
             <Card className="glass">
               <CardHeader>
@@ -117,17 +116,17 @@ export default function NewInspectionPage() {
                   <input ref={inputRef} type="file" accept="image/*" multiple className="hidden" onChange={(event) => event.target.files && addFiles(event.target.files)} />
                 </div>
 
-                {(files.length > 0 || demoReady) && (
+                {files.length > 0 && (
                   <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                    {demoReady && <DemoThumbnail />}
                     {files.map((file) => <FileThumbnail key={`${file.name}-${file.lastModified}`} file={file} onRemove={() => setFiles((current) => current.filter((item) => item !== file))} />)}
                   </div>
                 )}
 
                 <div className="mt-6 flex flex-col gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:items-center sm:justify-between">
-                  <Button type="button" variant="ghost" onClick={useDemo}><ScanLine className="mr-2 h-4 w-4" />Use synthetic demo case</Button>
-                  <Button type="button" size="lg" disabled={files.length === 0 && !demoReady} onClick={analyse}><ScanLine className="mr-2 h-5 w-5" />Analyse product</Button>
+                  <p className="max-w-sm text-xs leading-5 text-slate-500">Images are sent to the authorised backend CNN. No compliance decision is made in the browser.</p>
+                  <Button type="button" size="lg" disabled={files.length === 0 || isAnalyzing} onClick={analyse}><ScanLine className="mr-2 h-5 w-5" />{isAnalyzing ? "Analysing..." : "Analyse product"}</Button>
                 </div>
+                {error && <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{error}</div>}
               </CardContent>
             </Card>
 
@@ -156,7 +155,7 @@ export default function NewInspectionPage() {
           </div>
         )}
 
-        {showResult && <InspectionResult onRestart={() => { setShowResult(false); setDemoReady(false); setFiles([]); setStepIndex(-1) }} />}
+        {result && <InspectionResult result={result} onRestart={() => { setResult(null); setFiles([]); setStepIndex(-1) }} />}
       </div>
     </MainLayout>
   )
@@ -172,12 +171,7 @@ function FileThumbnail({ file, onRemove }: { file: File; onRemove: () => void })
   return <div className="relative overflow-hidden rounded-lg border border-slate-200 bg-white"><div className="aspect-video bg-slate-100">{preview && <img src={preview} alt={file.name} className="h-full w-full object-cover" />}</div><button type="button" onClick={onRemove} className="absolute right-2 top-2 rounded-full bg-slate-950/75 p-1 text-white" aria-label={`Remove ${file.name}`}><X className="h-3 w-3" /></button><p className="truncate px-3 py-2 text-xs font-medium text-slate-700">{file.name}</p></div>
 }
 
-function DemoThumbnail() {
-  return <div className="overflow-hidden rounded-lg border border-amber-200 bg-amber-50"><div className="flex aspect-video items-center justify-center bg-gradient-to-br from-amber-100 via-orange-50 to-slate-100"><div className="h-20 w-24 rounded-md bg-amber-400 p-2 text-center text-[9px] font-black uppercase leading-3 text-slate-950 shadow-lg">Harvest Gold<br /><span className="text-[7px]">Basmati Rice</span><br /><span className="text-[7px]">500 g · Rs. 499</span></div></div><p className="px-3 py-2 text-xs font-semibold text-amber-900">Synthetic demo package</p></div>
-}
-
-function InspectionResult({ onRestart }: { onRestart: () => void }) {
-  const result = demoInspectionResult
+function InspectionResult({ result, onRestart }: { result: DemoInspectionResult; onRestart: () => void }) {
   const failed = result.findings.filter((finding) => finding.state === "fail").length
   const review = result.findings.filter((finding) => finding.state === "review").length
   return <div className="space-y-6">
@@ -193,7 +187,7 @@ function InspectionResult({ onRestart }: { onRestart: () => void }) {
 
     <Card className="glass"><CardHeader className="flex flex-row items-center justify-between"><div><CardTitle>Rule findings</CardTitle><p className="mt-1 text-sm text-slate-500">The model extracts evidence; deterministic rules produce findings.</p></div><Badge variant="outline">Ruleset PCR-2011 · v2026.09</Badge></CardHeader><CardContent className="space-y-3">{result.findings.map((finding) => { const style = stateStyles(finding.state); const Icon = style.icon; return <div key={finding.id} className={`rounded-xl border p-4 ${style.background}`}><div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div className="flex gap-3"><Icon className={`mt-0.5 h-5 w-5 shrink-0 ${style.color}`} /><div><div className="flex flex-wrap items-center gap-2"><h3 className="font-semibold text-slate-900">{finding.title}</h3><Badge variant={finding.state === "fail" ? "destructive" : "warning"}>{finding.ruleId}</Badge></div><p className="mt-1 text-sm leading-6 text-slate-600">{finding.description}</p><p className="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-500">{finding.evidenceLabel} · {Math.round(finding.confidence * 100)}% confidence</p></div></div><Button variant="outline" size="sm"><Info className="mr-2 h-4 w-4" />View evidence</Button></div></div> })}</CardContent></Card>
 
-    <div className="flex flex-col gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm text-slate-500">Synthetic demonstration case. Final determination requires authorised human verification.</p><Button variant="outline" onClick={onRestart}><ArrowLeft className="mr-2 h-4 w-4" />Start another inspection</Button></div>
+    <div className="flex flex-col gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm text-slate-500">Backend-generated assessment. Final determination requires authorised human verification.</p><Button variant="outline" onClick={onRestart}><ArrowLeft className="mr-2 h-4 w-4" />Start another inspection</Button></div>
   </div>
 }
 
