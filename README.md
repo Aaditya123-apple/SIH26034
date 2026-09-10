@@ -36,6 +36,9 @@ npm run build
 ### Production
 
 ```bash
+npm start
+```
+
 ## Backend API
 
 Set `NEXT_PUBLIC_API_URL` to the backend API base URL. The frontend requests `GET /reports` and sends a JWT as `Authorization: Bearer <token>` when one has been stored after login. It also sends `credentials: include` so the backend may use a secure HttpOnly cookie instead.
@@ -50,8 +53,12 @@ Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
 ```
 
 The backend must answer `OPTIONS` preflight requests and validate the JWT before returning reports. Store `NEXT_PUBLIC_API_URL` in Vercel project environment variables for Preview and Production environments.
-npm start
-```
+
+## Supabase
+
+Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in the local environment and in Vercel. Run `supabase/schema.sql` in the Supabase SQL editor to create the reports table, Row Level Security policy, and private inspection image bucket.
+
+When Supabase variables are configured, the frontend uses Supabase Auth for login, reads reports from Postgres, and uploads images to Storage. The CNN and transformer backend should use a server-side Supabase service-role key to write completed reports; never expose that key as a `NEXT_PUBLIC_` variable.
 
 ## Deployment
 

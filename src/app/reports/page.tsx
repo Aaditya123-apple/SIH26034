@@ -6,6 +6,7 @@ import { MainLayout } from "@/components/main-layout"
 import { Card, CardContent, CardHeader, CardTitle, Button, Badge } from "@/components/ui"
 import { LoadingSpinner } from "@/components/ui"
 import { fetchReports } from "@/lib/api"
+import { isSupabaseConfigured } from "@/lib/supabase"
 import type { Report } from "@/lib/types"
 import { 
   FileText, 
@@ -148,14 +149,15 @@ const mockReports: Report[] = [
 ]
 
 export default function ReportsPage() {
+  const hasDataSource = Boolean(process.env.NEXT_PUBLIC_API_URL) || isSupabaseConfigured()
   const [reports, setReports] = useState<Report[]>(mockReports)
   const [selectedReport, setSelectedReport] = useState<Report | null>(null)
   const [filter, setFilter] = useState<"all" | "compliant" | "non-compliant">("all")
-  const [isLoading, setIsLoading] = useState(Boolean(process.env.NEXT_PUBLIC_API_URL))
+  const [isLoading, setIsLoading] = useState(hasDataSource)
   const [apiError, setApiError] = useState<string | null>(null)
 
   React.useEffect(() => {
-    if (!process.env.NEXT_PUBLIC_API_URL) {
+    if (!hasDataSource) {
       return
     }
 
@@ -176,7 +178,7 @@ export default function ReportsPage() {
       .finally(() => setIsLoading(false))
 
     return () => controller.abort()
-  }, [])
+  }, [hasDataSource])
 
   const filteredReports = filter === "all" 
     ? reports 

@@ -1,5 +1,6 @@
 import type { Report } from "./types"
 import { clearAccessToken, getAccessToken, setAccessToken } from "./auth"
+import { fetchSupabaseReports, isSupabaseConfigured, signInWithPassword } from "./supabase"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "")
 
@@ -33,6 +34,10 @@ export async function apiFetch(path: string, init: RequestInit = {}): Promise<Re
 }
 
 export async function fetchReports(signal?: AbortSignal): Promise<Report[]> {
+  if (isSupabaseConfigured()) {
+    return fetchSupabaseReports()
+  }
+
   const response = await apiFetch("/reports", {
     method: "GET",
     signal,
@@ -48,6 +53,11 @@ export async function fetchReports(signal?: AbortSignal): Promise<Report[]> {
 }
 
 export async function login(email: string, password: string): Promise<void> {
+  if (isSupabaseConfigured()) {
+    await signInWithPassword(email, password)
+    return
+  }
+
   const response = await apiFetch("/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -70,5 +80,4 @@ export async function login(email: string, password: string): Promise<void> {
 
 export function logout(): void {
   clearAccessToken()
-}
 }
