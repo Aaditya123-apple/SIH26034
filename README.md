@@ -36,6 +36,20 @@ npm run build
 ### Production
 
 ```bash
+## Backend API
+
+Set `NEXT_PUBLIC_API_URL` to the backend API base URL. The frontend requests `GET /reports` and sends a JWT as `Authorization: Bearer <token>` when one has been stored after login. It also sends `credentials: include` so the backend may use a secure HttpOnly cookie instead.
+
+The backend must allow the deployed frontend origin, not `*` when credentials are enabled:
+
+```text
+Access-Control-Allow-Origin: https://your-vercel-domain.vercel.app
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Headers: Content-Type, Authorization
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+```
+
+The backend must answer `OPTIONS` preflight requests and validate the JWT before returning reports. Store `NEXT_PUBLIC_API_URL` in Vercel project environment variables for Preview and Production environments.
 npm start
 ```
 

@@ -1,4 +1,5 @@
 import type { Report } from "./types"
+import { clearAccessToken, getAccessToken, setAccessToken } from "./auth"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "")
 
@@ -6,14 +7,34 @@ interface ReportsResponse {
   reports?: Report[]
 }
 
-export async function fetchReports(signal?: AbortSignal): Promise<Report[]> {
+interface LoginResponse {
+  accessToken?: string
+  token?: string
+}
+
+export async function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
   if (!API_URL) {
     throw new Error("NEXT_PUBLIC_API_URL is not configured")
   }
 
-  const response = await fetch(`${API_URL}/reports`, {
+  const headers = new Headers(init.headers)
+  headers.set("Accept", "application/json")
+
+  const accessToken = getAccessToken()
+  if (accessToken) {
+    headers.set("Authorization", `Bearer ${accessToken}`)
+  }
+
+  return fetch(`${API_URL}${path}`, {
+    ...init,
+    headers,
+    credentials: "include",
+  })
+}
+
+export async function fetchReports(signal?: AbortSignal): Promise<Report[]> {
+  const response = await apiFetch("/reports", {
     method: "GET",
-    headers: { Accept: "application/json" },
     signal,
     cache: "no-store",
   })
@@ -24,4 +45,30 @@ export async function fetchReports(signal?: AbortSignal): Promise<Report[]> {
 
   const payload = (await response.json()) as Report[] | ReportsResponse
   return Array.isArray(payload) ? payload : payload.reports ?? []
+}
+
+export async function login(email: string, password: string): Promise<void> {
+  const response = await apiFetch("/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  })
+
+  if (!response.ok) {
+    throw new Error(`Login failed with status ${response.status}`)
+  }
+
+  const payload = (await response.json()) as LoginResponse
+  const accessToken = payload.accessToken ?? payload.token
+
+  if (!accessToken) {
+    throw new Error("Login response did not include an access token")
+  }
+
+  setAccessToken(accessToken)
+}
+
+export function logout(): void {
+  clearAccessToken()
+}
 }
