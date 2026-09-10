@@ -39,6 +39,62 @@ npm run build
 npm start
 ```
 
+### Local containers
+
+The frontend and FastAPI backend can run together with Docker Compose:
+
+```bash
+docker compose up --build
+```
+
+Open `http://localhost:3000`. The backend is available at `http://localhost:8000`.
+SQLite data is stored in the `backend-data` Compose volume.
+
+### Kubernetes
+
+Build and push both images to a container registry, replace the placeholder image
+names and domains in `k8s/backend.yaml`, `k8s/frontend.yaml`, and
+`k8s/ingress.yaml`, then apply the manifests:
+
+```bash
+docker build -f backend/Dockerfile -t your-registry/legal-metrology-backend:latest .
+docker build -f Dockerfile --build-arg NEXT_PUBLIC_API_URL=https://api.your-domain.example -t your-registry/legal-metrology-frontend:latest .
+docker push your-registry/legal-metrology-backend:latest
+docker push your-registry/legal-metrology-frontend:latest
+
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/backend.yaml -f k8s/frontend.yaml -f k8s/ingress.yaml
+```
+
+The current Kubernetes backend uses one replica and a persistent SQLite volume.
+For multiple backend replicas or higher traffic, migrate the database to managed
+Postgres before scaling the backend deployment.
+
+### Performance notes
+
+The dashboard uses `GET /api/dashboard/overview` to fetch summary statistics and
+recent inspections in one request. Inspection processing remains synchronous for
+the legacy `/api/detections` demo endpoint. The live upload flow processes in a
+background task and streams status through a WebSocket.
+
+### Realtime inspection demo
+
+Open `http://localhost:3000/inspection/live` while the frontend and backend are
+running. Choose **Start camera** and **Capture frame**, or use **Upload image**.
+The browser sends a real multipart image to `POST /api/inspections/upload`, and
+the page listens on `/ws/inspections/{inspection_id}` for processing updates.
+
+Camera access requires HTTPS when deployed to a real server. The current live
+flow uses the existing mock detection and demo OCR adapters behind the real
+upload, persistence, background processing, and WebSocket contracts. To enable
+YOLO detection, install `ultralytics`, mount a trained model into the backend,
+and set `DETECTION_PROVIDER=yolo` plus `DETECTION_MODEL_PATH=/models/package.pt`.
+The detector then reads the uploaded image and records the best detection and
+bounding box. To enable real local OCR in the backend container, set `OCR_PROVIDER=tesseract`; the image
+includes the native Tesseract binary and Python bindings. The default `demo`
+providers keep the presentation flow deterministic until a trained detector and
+representative package images are available.
+
 ## Backend API
 
 Set `NEXT_PUBLIC_API_URL` to the backend API base URL. The frontend requests `GET /reports` and sends a JWT as `Authorization: Bearer <token>` when one has been stored after login. It also sends `credentials: include` so the backend may use a secure HttpOnly cookie instead.
@@ -67,16 +123,19 @@ When Supabase variables are configured, the frontend uses Supabase Auth for logi
 ### Vercel Deployment
 
 1. **Build the project:**
+
    ```bash
    npm run build
    ```
 
 2. **Deploy using Vercel CLI:**
+
    ```bash
    vercel deploy --temporary
    ```
 
    Or for permanent deployment:
+
    ```bash
    vercel login
    vercel deploy
@@ -90,6 +149,7 @@ When Supabase variables are configured, the frontend uses Supabase Auth for logi
 ### Netlify Deployment
 
 1. **Build the project:**
+
    ```bash
    npm run build
    ```
@@ -131,11 +191,13 @@ SIH26034/
 ## Key Features
 
 ### Smart Reporting Logic
+
 - **1-2% violations**: Individual report
 - **3-4% violations**: Concern level raised
 - **5%+ violations**: Critical concern
 
 ### Report Details
+
 - Product information and ID
 - Factory location (city, region)
 - Manufacturing date and destination
@@ -144,6 +206,7 @@ SIH26034/
 - PDF download functionality
 
 ### Factory Tracking
+
 - Regional compliance overview
 - Factory-specific compliance rates
 - Supply chain visualization

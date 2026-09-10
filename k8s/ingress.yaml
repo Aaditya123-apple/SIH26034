@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: legal-metrology
+  namespace: legal-metrology
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: your-domain.example
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: legal-metrology-frontend
+                port:
+                  number: 3000
+    - host: api.your-domain.example
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: legal-metrology-backend
+                port:
+                  number: 8000

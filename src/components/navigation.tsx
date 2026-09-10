@@ -1,35 +1,37 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useState } from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { 
+import * as React from "react";
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
   LayoutDashboard,
-  FileText, 
-  Factory, 
+  FileText,
+  Factory,
   Menu,
   X,
   Search,
   BarChart3,
-  Settings
-} from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui"
-import { Input } from "@/components/ui"
+  Settings,
+  ScanLine,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui";
+import { Input } from "@/components/ui";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Live Inspection", href: "/inspection/live", icon: ScanLine },
   { name: "Reports", href: "/reports", icon: FileText },
   { name: "Factory Tracking", href: "/factories", icon: Factory },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
   { name: "Settings", href: "/settings", icon: Settings },
-]
+];
 
 export function Navigation() {
-  const pathname = usePathname()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
+  const pathname = usePathname();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <nav className="bg-white border-b border-slate-200">
@@ -73,7 +75,7 @@ export function Navigation() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-2">
             {navigation.map((item) => {
-              const isActive = pathname === item.href
+              const isActive = pathname === item.href;
               return (
                 <Link
                   key={item.name}
@@ -82,13 +84,13 @@ export function Navigation() {
                     "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
                     isActive
                       ? "bg-primary text-white"
-                      : "text-slate-700 hover:bg-slate-100"
+                      : "text-slate-700 hover:bg-slate-100",
                   )}
                 >
                   <item.icon className="h-4 w-4" />
                   <span>{item.name}</span>
                 </Link>
-              )
+              );
             })}
           </div>
 
@@ -114,7 +116,7 @@ export function Navigation() {
         <div className="md:hidden border-t border-slate-200 bg-white">
           <div className="px-4 py-3 space-y-2">
             {navigation.map((item) => {
-              const isActive = pathname === item.href
+              const isActive = pathname === item.href;
               return (
                 <Link
                   key={item.name}
@@ -123,18 +125,18 @@ export function Navigation() {
                     "flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
                     isActive
                       ? "bg-primary text-white"
-                      : "text-slate-700 hover:bg-slate-100"
+                      : "text-slate-700 hover:bg-slate-100",
                   )}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <item.icon className="h-5 w-5" />
                   <span>{item.name}</span>
                 </Link>
-              )
+              );
             })}
           </div>
         </div>
       )}
     </nav>
-  )
+  );
 }

@@ -2,6 +2,12 @@
 
 # dependencies
 /node_modules/
+/backend/__pycache__/
+/backend/app/__pycache__/
+/backend/app/services/__pycache__/
+/backend/tests/__pycache__/
+/backend/data/*.db
+/backend/data/uploads/*
 /.pnp
 .pnp.js
 

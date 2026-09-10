@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: legal-metrology-frontend
+  namespace: legal-metrology
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: legal-metrology-frontend
+  template:
+    metadata:
+      labels:
+        app: legal-metrology-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: your-registry/legal-metrology-frontend:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NEXT_PUBLIC_API_URL
+              value: https://api.your-domain.example
+          readinessProbe:
+            httpGet:
+              path: /dashboard
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: legal-metrology-frontend
+  namespace: legal-metrology
+spec:
+  selector:
+    app: legal-metrology-frontend
+  ports:
+    - port: 3000
+      targetPort: 3000
