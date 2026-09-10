@@ -138,7 +138,7 @@ export default function NewInspectionPage() {
               <CardContent>
                 <div className="space-y-3">
                   {inspectionSteps.map((step, index) => {
-                    const complete = stepIndex > index || showResult
+                    const complete = stepIndex > index || result !== null
                     const active = isAnalyzing && stepIndex === index
                     return <div key={step} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm">
                       <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${complete ? "bg-emerald-400 text-slate-950" : active ? "bg-amber-300 text-slate-950" : "bg-slate-800 text-slate-500"}`}>
