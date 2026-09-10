@@ -1,74 +1,17 @@
 "use client"
 
 import * as React from "react"
-import { MainLayout } from "@/components/layout/main-layout"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { MainLayout } from "@/components/main-layout"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui"
+import { Badge } from "@/components/ui"
 import { 
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  AreaChart,
-  Area,
+  TrendingUp, 
+  AlertTriangle, 
+  CheckCircle,
+  BarChart3,
   PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts"
-
-// Mock data for analytics charts
-const categoryComplianceData = [
-  { category: "Dairy", compliant: 450, partially: 35, nonCompliant: 15 },
-  { category: "Food", compliant: 890, partially: 120, nonCompliant: 45 },
-  { category: "Personal Care", compliant: 320, partially: 50, nonCompliant: 20 },
-  { category: "Household", compliant: 280, partially: 40, nonCompliant: 18 },
-  { category: "Beverages", compliant: 210, partially: 30, nonCompliant: 12 },
-]
-
-const monthlyTrendData = [
-  { month: "Jan", inspections: 1200, violations: 98, avgScore: 89.2 },
-  { month: "Feb", inspections: 1350, violations: 112, avgScore: 90.1 },
-  { month: "Mar", inspections: 1480, violations: 125, avgScore: 89.8 },
-  { month: "Apr", inspections: 1420, violations: 118, avgScore: 91.2 },
-  { month: "May", inspections: 1650, violations: 142, avgScore: 90.8 },
-  { month: "Jun", inspections: 1890, violations: 156, avgScore: 91.5 },
-  { month: "Jul", inspections: 2100, violations: 178, avgScore: 92.1 },
-  { month: "Aug", inspections: 1950, violations: 165, avgScore: 91.8 },
-  { month: "Sep", inspections: 2200, violations: 185, avgScore: 92.5 },
-  { month: "Oct", inspections: 2400, violations: 198, avgScore: 93.1 },
-  { month: "Nov", inspections: 2350, violations: 192, avgScore: 92.8 },
-  { month: "Dec", inspections: 2600, violations: 215, avgScore: 91.8 },
-]
-
-const violationTypeData = [
-  { name: "MRP Issues", value: 35, color: "#DC2626" },
-  { name: "Font Size", value: 25, color: "#F59E0B" },
-  { name: "Manufacturer", value: 18, color: "#16A34A" },
-  { name: "Net Quantity", value: 12, color: "#0F4C81" },
-  { name: "Date Issues", value: 6, color: "#1E3A8A" },
-  { name: "Consumer Care", value: 4, color: "#6B7280" },
-]
-
-const officerPerformanceData = [
-  { officer: "Sharma", inspections: 2450, avgScore: 92.5, violations: 145 },
-  { officer: "Patel", inspections: 2100, avgScore: 91.8, violations: 168 },
-  { officer: "Singh", inspections: 1980, avgScore: 93.2, violations: 125 },
-  { officer: "Kumar", inspections: 1850, avgScore: 90.5, violations: 195 },
-  { officer: "Verma", inspections: 1750, avgScore: 91.0, violations: 178 },
-]
-
-const regionalData = [
-  { region: "North", inspections: 4200, complianceRate: 92.1 },
-  { region: "South", inspections: 3800, complianceRate: 93.5 },
-  { region: "East", inspections: 3500, complianceRate: 90.8 },
-  { region: "West", inspections: 4100, complianceRate: 91.2 },
-  { region: "Central", inspections: 2823, complianceRate: 89.5 },
-]
+  Activity
+} from "lucide-react"
 
 export default function AnalyticsPage() {
   return (
@@ -76,193 +19,175 @@ export default function AnalyticsPage() {
       <div className="space-y-6">
         {/* Page Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Analytics</h1>
-          <p className="text-gray-600">
-            Comprehensive insights and trends from compliance inspections
+          <h1 className="text-3xl font-bold text-slate-900">Analytics Dashboard</h1>
+          <p className="text-slate-600">
+            Comprehensive compliance analysis and performance metrics
           </p>
         </div>
 
-        {/* Summary Cards */}
+        {/* Statistics Cards */}
         <div className="grid gap-4 md:grid-cols-4">
-          <Card>
+          <Card className="glass">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
+              <CardTitle className="text-sm font-medium text-slate-600 flex items-center">
+                <Activity className="h-4 w-4 mr-2" />
                 Total Inspections
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900">18,423</div>
-              <p className="text-xs text-success mt-1">+12.5% from last year</p>
+              <div className="text-2xl font-bold text-slate-900">1,234</div>
+              <p className="text-xs text-green-600 mt-1">+12% from last month</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="glass">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
-                Avg Compliance Score
+              <CardTitle className="text-sm font-medium text-slate-600 flex items-center">
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Compliance Rate
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900">91.8%</div>
-              <p className="text-xs text-success mt-1">+2.3% improvement</p>
+              <div className="text-2xl font-bold text-green-600">87.5%</div>
+              <p className="text-xs text-green-600 mt-1">+2.3% from last month</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="glass">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
-                Total Violations
+              <CardTitle className="text-sm font-medium text-slate-600 flex items-center">
+                <AlertTriangle className="h-4 w-4 mr-2" />
+                Violations Found
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900">2,164</div>
-              <p className="text-xs text-success mt-1">-5.2% from last year</p>
+              <div className="text-2xl font-bold text-red-600">156</div>
+              <p className="text-xs text-red-600 mt-1">-5% from last month</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="glass">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
-                Active Officers
+              <CardTitle className="text-sm font-medium text-slate-600 flex items-center">
+                <TrendingUp className="h-4 w-4 mr-2" />
+                Avg Response Time
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900">156</div>
-              <p className="text-xs text-gray-500 mt-1">Across 5 regions</p>
+              <div className="text-2xl font-bold text-slate-900">2.4h</div>
+              <p className="text-xs text-green-600 mt-1">-15% from last month</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Monthly Trend Chart */}
-        <Card>
+        {/* Compliance Trend */}
+        <Card className="glass">
           <CardHeader>
-            <CardTitle>Monthly Inspection Trends</CardTitle>
+            <CardTitle className="flex items-center">
+              <BarChart3 className="h-5 w-5 mr-2 text-slate-600" />
+              Compliance Trend (Last 6 Months)
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={350}>
-              <AreaChart data={monthlyTrendData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis yAxisId="left" />
-                <YAxis yAxisId="right" orientation="right" />
-                <Tooltip />
-                <Legend />
-                <Area
-                  yAxisId="left"
-                  type="monotone"
-                  dataKey="inspections"
-                  stroke="#0F4C81"
-                  fill="#0F4C81"
-                  fillOpacity={0.3}
-                  name="Inspections"
-                />
-                <Line
-                  yAxisId="right"
-                  type="monotone"
-                  dataKey="avgScore"
-                  stroke="#16A34A"
-                  strokeWidth={2}
-                  name="Avg Score (%)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+            <div className="space-y-4">
+              {[
+                { month: "Aug", rate: 82, color: "bg-blue-500" },
+                { month: "Sep", rate: 84, color: "bg-blue-500" },
+                { month: "Oct", rate: 85, color: "bg-blue-500" },
+                { month: "Nov", rate: 86, color: "bg-blue-500" },
+                { month: "Dec", rate: 87, color: "bg-blue-500" },
+                { month: "Jan", rate: 87.5, color: "bg-green-500" },
+              ].map((item) => (
+                <div key={item.month} className="flex items-center space-x-4">
+                  <div className="w-16 text-sm font-medium text-slate-700">{item.month}</div>
+                  <div className="flex-1 bg-slate-200 rounded-full h-4">
+                    <div
+                      className={`${item.color} h-4 rounded-full transition-all duration-500`}
+                      style={{ width: `${item.rate}%` }}
+                    />
+                  </div>
+                  <div className="w-16 text-sm font-bold text-slate-900 text-right">{item.rate}%</div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
 
-        {/* Category Compliance and Violation Distribution */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Compliance by Category</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={categoryComplianceData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="category" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="compliant" stackId="a" fill="#16A34A" name="Compliant" />
-                  <Bar dataKey="partially" stackId="a" fill="#F59E0B" name="Partially" />
-                  <Bar dataKey="nonCompliant" stackId="a" fill="#DC2626" name="Non-Compliant" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Violation Type Distribution</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={350}>
-                <PieChart>
-                  <Pie
-                    data={violationTypeData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) =>
-                      `${name} ${(percent * 100).toFixed(0)}%`
-                    }
-                    outerRadius={100}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {violationTypeData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Officer Performance */}
-        <Card>
+        {/* Violation Categories */}
+        <Card className="glass">
           <CardHeader>
-            <CardTitle>Officer Performance</CardTitle>
+            <CardTitle className="flex items-center">
+              <PieChart className="h-5 w-5 mr-2 text-slate-600" />
+              Violation Categories
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={officerPerformanceData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="officer" />
-                <YAxis yAxisId="left" />
-                <YAxis yAxisId="right" orientation="right" />
-                <Tooltip />
-                <Legend />
-                <Bar yAxisId="left" dataKey="inspections" fill="#0F4C81" name="Inspections" />
-                <Line
-                  yAxisId="right"
-                  type="monotone"
-                  dataKey="avgScore"
-                  stroke="#16A34A"
-                  strokeWidth={2}
-                  name="Avg Score (%)"
-                />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="grid gap-4 md:grid-cols-2">
+              {[
+                { category: "MRP Issues", count: 45, percentage: 29, color: "bg-red-500" },
+                { category: "Font Size", count: 38, percentage: 24, color: "bg-orange-500" },
+                { category: "Manufacturer Missing", count: 32, percentage: 21, color: "bg-yellow-500" },
+                { category: "Date Missing", count: 25, percentage: 16, color: "bg-blue-500" },
+                { category: "Net Quantity", count: 12, percentage: 8, color: "bg-green-500" },
+                { category: "Consumer Care", count: 4, percentage: 2, color: "bg-purple-500" },
+              ].map((item) => (
+                <div key={item.category} className="p-4 rounded-lg border border-slate-200 bg-slate-50">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium text-slate-900">{item.category}</span>
+                    <Badge variant="outline">{item.count} cases</Badge>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="flex-1 bg-slate-200 rounded-full h-2">
+                      <div
+                        className={`${item.color} h-2 rounded-full`}
+                        style={{ width: `${item.percentage}%` }}
+                      />
+                    </div>
+                    <span className="text-sm text-slate-600">{item.percentage}%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
 
         {/* Regional Performance */}
-        <Card>
+        <Card className="glass">
           <CardHeader>
-            <CardTitle>Regional Performance</CardTitle>
+            <CardTitle className="flex items-center">
+              <Activity className="h-5 w-5 mr-2 text-slate-600" />
+              Regional Performance
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={regionalData} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis dataKey="region" type="category" width={80} />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="inspections" fill="#0F4C81" name="Inspections" />
-                <Bar dataKey="complianceRate" fill="#16A34A" name="Compliance Rate (%)" />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="space-y-4">
+              {[
+                { region: "Gujarat", compliance: 92, factories: 45 },
+                { region: "Maharashtra", compliance: 88, factories: 38 },
+                { region: "Punjab", compliance: 85, factories: 32 },
+                { region: "West Bengal", compliance: 82, factories: 28 },
+                { region: "Tamil Nadu", compliance: 90, factories: 25 },
+              ].map((item) => (
+                <div key={item.region} className="flex items-center justify-between p-4 rounded-lg border border-slate-200 bg-slate-50">
+                  <div>
+                    <p className="font-medium text-slate-900">{item.region}</p>
+                    <p className="text-sm text-slate-600">{item.factories} factories</p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-32 bg-slate-200 rounded-full h-2">
+                      <div
+                        className={`h-2 rounded-full ${
+                          item.compliance >= 90
+                            ? "bg-green-500"
+                            : item.compliance >= 85
+                            ? "bg-yellow-500"
+                            : "bg-red-500"
+                        }`}
+                        style={{ width: `${item.compliance}%` }}
+                      />
+                    </div>
+                    <span className="text-sm font-bold text-slate-900">{item.compliance}%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>

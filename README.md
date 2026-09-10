@@ -1,220 +1,139 @@
 # Legal Metrology Compliance Platform
 
-A production-quality frontend application for the Smart India Hackathon Problem Statement SIH26034 - Packaged Commodity Compliance Inspection Platform.
-
-## Overview
-
-This platform enables Legal Metrology officers to inspect packaged commodities for compliance with the Legal Metrology (Packaged Commodities) Rules, 2011. The system uses AI-powered image analysis to detect violations in product labels and generate comprehensive compliance reports.
+A streamlined compliance inspection and analysis system for monitoring packaged commodities under Legal Metrology (Packaged Commodities) Rules, 2011.
 
 ## Features
 
-### 🔍 AI-Powered Inspection
-- Upload product images via drag-and-drop, file browser, or camera capture
-- Real-time AI analysis with animated processing workflow
-- Automatic detection of label violations (MRP, font size, manufacturer details, etc.)
-- Interactive image viewer with zoom, pan, and annotation overlays
+- **Reports Management**: View and analyze compliance inspection reports
+- **Factory Tracking**: Monitor manufacturing facilities and compliance across regions
+- **Violation Analysis**: Smart reporting logic (1-2% individual, 3-4% concern levels)
+- **PDF Generation**: Download detailed compliance reports
+- **Law/Act Violations**: Detailed information about legal violations
+- **Supply Chain Tracking**: Factory location, city, region, and destination information
 
-### 📊 Comprehensive Dashboard
-- Real-time KPIs: Total inspections, compliance rate, violations detected
-- Interactive charts using Recharts (Line, Area, Pie charts)
-- Monthly inspection trends and compliance analytics
-- Recent inspections table with status indicators
+## Quick Start
 
-### 📋 Compliance Reports
-- Detailed compliance analysis with scores and risk levels
-- Issue severity classification (Critical, High, Medium, Low)
-- Rule references and recommendations for each violation
-- PDF export functionality
+### Installation
 
-### 📈 Analytics & Insights
-- Category-wise compliance analysis
-- Violation type distribution
-- Officer performance metrics
-- Regional compliance trends
-
-### ⚙️ User Management
-- Secure authentication system
-- Profile management with performance tracking
-- Customizable notification preferences
-- System settings and themes
-
-## Tech Stack
-
-- **Framework**: Next.js 15 with App Router
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **UI Components**: ShadCN UI (Radix UI primitives)
-- **Animations**: Framer Motion
-- **Charts**: Recharts
-- **Icons**: Lucide React
-- **Forms**: React Hook Form with Zod validation
-- **State Management**: TanStack Query
-- **HTTP Client**: Axios
-
-## Installation
-
-1. Navigate to the project directory:
-```bash
-cd legal-metrology-platform
-```
-
-2. Install dependencies:
 ```bash
 npm install
 ```
 
-3. Run the development server:
+### Development
+
 ```bash
 npm run dev
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Build
+
+```bash
+npm run build
+```
+
+### Production
+
+```bash
+npm start
+```
+
+## Deployment
+
+### Vercel Deployment
+
+1. **Build the project:**
+   ```bash
+   npm run build
+   ```
+
+2. **Deploy using Vercel CLI:**
+   ```bash
+   vercel deploy --temporary
+   ```
+
+   Or for permanent deployment:
+   ```bash
+   vercel login
+   vercel deploy
+   ```
+
+3. **Or use Vercel Dashboard:**
+   - Connect your GitHub repository
+   - Vercel will automatically detect Next.js
+   - Click "Deploy"
+
+### Netlify Deployment
+
+1. **Build the project:**
+   ```bash
+   npm run build
+   ```
+
+2. **Drag and drop:**
+   - Go to [https://app.netlify.com/drop](https://app.netlify.com/drop)
+   - Drag the project folder onto the page
+   - Get your live URL instantly
 
 ## Project Structure
 
 ```
-legal-metrology-platform/
+SIH26034/
 ├── src/
-│   ├── app/                    # Next.js App Router pages
-│   │   ├── login/             # Authentication page
-│   │   ├── dashboard/         # Main dashboard
-│   │   ├── inspection/        # Product inspection interface
-│   │   ├── reports/           # Reports management
-│   │   ├── analytics/         # Analytics and insights
-│   │   ├── settings/          # User settings
-│   │   ├── profile/           # User profile
-│   │   └── help/              # Help center
-│   ├── components/            # React components
-│   │   ├── ui/                # ShadCN UI components
-│   │   ├── layout/            # Layout components (Sidebar, Header)
-│   │   ├── inspection/        # Inspection-specific components
-│   │   └── dashboard/         # Dashboard-specific components
-│   ├── lib/                   # Utility functions
-│   ├── hooks/                 # Custom React hooks
-│   └── types/                 # TypeScript type definitions
-├── public/                    # Static assets
-└── package.json               # Dependencies and scripts
+│   ├── app/
+│   │   ├── reports/          # Reports management page
+│   │   ├── factories/        # Factory tracking page
+│   │   ├── layout.tsx        # Root layout
+│   │   ├── page.tsx         # Home page (redirects to reports)
+│   │   └── globals.css      # Global styles
+│   ├── components/
+│   │   ├── ui/              # UI components
+│   │   ├── main-layout.tsx  # Main layout wrapper
+│   │   └── navigation.tsx   # Top navigation
+│   ├── lib/
+│   │   ├── utils.ts         # Utility functions
+│   │   └── pdf-generator.ts # PDF generation
+│   └── types/              # TypeScript types
+├── public/                  # Static assets
+└── package.json            # Dependencies
 ```
 
-## Design System
+## Application Routes
 
-### Color Palette
-- **Primary**: #0F4C81 (Government Blue)
-- **Secondary**: #1E3A8A (Deep Blue)
-- **Success**: #16A34A (Green)
-- **Warning**: #F59E0B (Amber)
-- **Danger**: #DC2626 (Red)
-- **Background**: #F8FAFC (Light Gray)
-- **Card Background**: #FFFFFF (White)
+- `/` - Redirects to reports page
+- `/reports` - Compliance reports and analysis
+- `/factories` - Factory tracking and supply chain
 
-### Design Principles
-- Government SaaS aesthetic
-- Microsoft Fluent-inspired design
-- Clean, professional dashboards
-- Large spacing and clear typography
-- Smooth animations and transitions
-- Enterprise-grade polish
+## Key Features
 
-## Key Pages
+### Smart Reporting Logic
+- **1-2% violations**: Individual report
+- **3-4% violations**: Concern level raised
+- **5%+ violations**: Critical concern
 
-### Login Page
-- Government of India branding
-- Employee ID authentication
-- Feature highlights
-- Secure login flow
+### Report Details
+- Product information and ID
+- Factory location (city, region)
+- Manufacturing date and destination
+- Violation details with severity
+- Law/Act violation references
+- PDF download functionality
 
-### Dashboard
-- KPI cards with trend indicators
-- Monthly inspection volume chart
-- Compliance trend analysis
-- Violation distribution pie chart
-- Recent inspections table
+### Factory Tracking
+- Regional compliance overview
+- Factory-specific compliance rates
+- Supply chain visualization
+- Destination tracking
 
-### Inspection (Main Feature)
-- **Left Panel**: Image upload with drag-and-drop, recent uploads
-- **Center Panel**: Interactive image viewer with annotations, zoom/pan
-- **Right Panel**: Compliance analysis, score circle, issues list
-- **AI Analysis**: Animated processing workflow with 8 steps
-- **Report Modal**: Detailed compliance report with PDF export
+## Design
 
-### Reports
-- Searchable reports table
-- Category and status filters
-- Report statistics
-- View, download, and delete actions
-
-### Analytics
-- Category compliance analysis
-- Monthly trends
-- Violation type distribution
-- Officer performance metrics
-- Regional compliance data
-
-### Settings
-- Profile management
-- Notification preferences
-- Security settings (2FA, password)
-- System preferences (theme, language, timezone)
-
-### Profile
-- Officer information display
-- Performance metrics
-- Certifications and achievements
-- Recent activity
-
-### Help Center
-- Searchable FAQs
-- Video tutorials
-- Contact support options
-- System status
-
-## Development
-
-### Available Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm start` - Start production server
-- `npm run lint` - Run ESLint
-
-### Component Development
-
-All UI components are built using ShadCN UI primitives and follow the established design system. When adding new components:
-
-1. Use existing UI components from `src/components/ui/`
-2. Follow the government color palette
-3. Maintain consistent spacing and typography
-4. Add appropriate TypeScript types
-5. Ensure responsive design
-
-## Compliance Rules Reference
-
-The platform checks compliance against:
-- **Legal Metrology (Packaged Commodities) Rules, 2011**
-- MRP display requirements
-- Font size minimums (1.2mm)
-- Manufacturer details
-- Net quantity format
-- Manufacturing/packaging dates
-- Consumer care information
-
-## Browser Support
-
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
+- **Professional government aesthetic**
+- **Clean, modern interface**
+- **Responsive design**
+- **Accessible color scheme**
+- **Minimal, focused layout**
 
 ## License
 
-This project is developed for the Smart India Hackathon 2024 (SIH26034).
-
-## Acknowledgments
-
-- Government of India, Ministry of Consumer Affairs
-- Legal Metrology Department
-- Smart India Hackathon 2024
-
----
-
-**Built with ❤️ for Digital India**
+Developed for Smart India Hackathon 2024 (SIH26034)
